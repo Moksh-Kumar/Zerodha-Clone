@@ -1,16 +1,16 @@
-require('dotenv').config();
+require("dotenv").config();
 
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 
-const {HoldingsModel} = require("./model/HoldingsModel");
-const {PositionsModel} = require("./model/PositionsModel")
-const {OrdersModel} = require("./model/OrdersModel")
+const { HoldingsModel } = require("./model/HoldingsModel");
+const { PositionsModel } = require("./model/PositionsModel");
+const { OrdersModel } = require("./model/OrdersModel");
 
-const PORT = process.send.PORT || 3002;
-const uri=process.env.MONGO_URL;
+const PORT = process.env.PORT || 3002;
+const uri = process.env.MONGO_URL;
 
 const app = express();
 
@@ -222,44 +222,55 @@ app.use(bodyParser.json());
 //   res.send("Done!");
 // });
 
-app.get("/allHoldings" , async (req,res)=>{
-    let allHoldings = await HoldingsModel.find({});
-    res.json(allHoldings);
+app.get("/allHoldings", async (req, res) => {
+  let allHoldings = await HoldingsModel.find({});
+  res.json(allHoldings);
 });
 
-app.get("/allPositions" , async (req,res)=>{
-    let allPositions = await PositionsModel.find({});
-    res.json(allPositions);
+app.get("/allPositions", async (req, res) => {
+  let allPositions = await PositionsModel.find({});
+  res.json(allPositions);
 });
 
-app.post("/newOrder",async(req,res)=>{
-    try {
-        console.log("BODY:", req.body);
+app.post("/newOrder", async (req, res) => {
+  try {
+    console.log("BODY:", req.body);
 
-        const newOrder = new OrdersModel({
-            name: req.body.name,
-            qty: req.body.qty,
-            price: req.body.price,
-            mode: req.body.mode,
-        });
+    const newOrder = new OrdersModel({
+      name: req.body.name,
+      qty: req.body.qty,
+      price: req.body.price,
+      mode: req.body.mode,
+    });
 
-        console.log("ORDER:", newOrder);
+    console.log("ORDER:", newOrder);
 
-        await newOrder.save();
+    await newOrder.save();
 
-        res.status(201).json(newOrder);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: err.message });
-    }
-})
+    res.status(201).json(newOrder);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/", (req, res) => {
+  res.send("Zerodha Clone Backend is running");
+});
 // app.get("/allOrders" , async (req,res)=>{
 //     let allOrders = await OrdersModel.find({});
 //     res.json(allOrders);
 // });
 
-app.listen(3002, ()=>{
-    console.log("App started!");
-    mongoose.connect(uri);
+mongoose
+  .connect(uri)
+  .then(() => {
     console.log("DB connected");
-});
+
+    app.listen(PORT, () => {
+      console.log(`App started on port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error("DB connection failed:", err);
+  });
