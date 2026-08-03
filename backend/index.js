@@ -232,10 +232,31 @@ app.get("/allPositions" , async (req,res)=>{
     res.json(allPositions);
 });
 
-app.get("/allOrders" , async (req,res)=>{
-    let allOrders = await OrdersModel.find({});
-    res.json(allOrders);
-});
+app.post("/newOrder",async(req,res)=>{
+    try {
+        console.log("BODY:", req.body);
+
+        const newOrder = new OrdersModel({
+            name: req.body.name,
+            qty: req.body.qty,
+            price: req.body.price,
+            mode: req.body.mode,
+        });
+
+        console.log("ORDER:", newOrder);
+
+        await newOrder.save();
+
+        res.status(201).json(newOrder);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: err.message });
+    }
+})
+// app.get("/allOrders" , async (req,res)=>{
+//     let allOrders = await OrdersModel.find({});
+//     res.json(allOrders);
+// });
 
 app.listen(3002, ()=>{
     console.log("App started!");
